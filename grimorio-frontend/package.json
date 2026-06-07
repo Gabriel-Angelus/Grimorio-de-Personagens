@@ -1,0 +1,12 @@
+{
+  "name": "grimorio-frontend",
+  "version": "1.0.0",
+  "description": "Frontend estatico do Grimorio RPG.",
+  "scripts": {
+    "dev": "node frontend-server.js",
+    "start": "node frontend-server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
