@@ -1,3 +1,5 @@
+import db from '../db.js';
+
 export interface Campanha {
   id: number;
   nome: string;
@@ -5,45 +7,51 @@ export interface Campanha {
   criadaEm: string;
 }
 
-let campanhas: Campanha[] = [];
-let nextId = 1;
-
 export const campanhaModel = {
   listarTodas(): Campanha[] {
-    return campanhas;
+    const stmt = db.prepare('SELECT * FROM campanhas');
+    return stmt.all() as Campanha[];
   },
 
   buscarPorId(id: number): Campanha | null {
-    return campanhas.find((campanha) => campanha.id === id) || null;
+    const stmt = db.prepare('SELECT * FROM campanhas WHERE id = ?');
+    const result = stmt.get(id) as Campanha | undefined;
+    return result || null;
   },
 
   inserir(dados: Omit<Campanha, 'id' | 'criadaEm'>): Campanha {
-    const novaCampanha: Campanha = {
-      id: nextId++,
-      ...dados,
-      criadaEm: new Date().toISOString(),
+    const criadaEm = new Date().toISOString();
+    const stmt = db.prepare('INSERT INTO campanhas (nome, descricao, criadaEm) VALUES (?, ?, ?)');
+    const info = stmt.run(dados.nome, dados.descricao || null, criadaEm);
+    
+    return {
+      id: info.lastInsertRowid as number,
+      nome: dados.nome,
+      descricao: dados.descricao || null,
+      criadaEm,
     };
-
-    campanhas.push(novaCampanha);
-    return novaCampanha;
   },
 
   atualizar(id: number, dados: Partial<Omit<Campanha, 'id' | 'criadaEm'>>): Campanha | null {
-    const index = campanhas.findIndex((campanha) => campanha.id === id);
-    if (index === -1) return null;
+    const campanhaAtual = this.buscarPorId(id);
+    if (!campanhaAtual) return null;
 
-    campanhas[index] = {
-      ...campanhas[index],
-      ...dados,
-      id,
+    const nome = dados.nome !== undefined ? dados.nome : campanhaAtual.nome;
+    const descricao = dados.descricao !== undefined ? dados.descricao : campanhaAtual.descricao;
+
+    const stmt = db.prepare('UPDATE campanhas SET nome = ?, descricao = ? WHERE id = ?');
+    stmt.run(nome, descricao, id);
+
+    return {
+      ...campanhaAtual,
+      nome,
+      descricao: descricao || null,
     };
-
-    return campanhas[index];
   },
 
   remover(id: number): boolean {
-    const tamanhoAntes = campanhas.length;
-    campanhas = campanhas.filter((campanha) => campanha.id !== id);
-    return campanhas.length < tamanhoAntes;
+    const stmt = db.prepare('DELETE FROM campanhas WHERE id = ?');
+    const info = stmt.run(id);
+    return info.changes > 0;
   },
 };

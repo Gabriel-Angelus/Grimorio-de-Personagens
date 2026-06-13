@@ -1,3 +1,4 @@
+import db from '../db.js';
 import type { Atributos } from '../types/atributos.js';
 
 export interface Personagem {
@@ -12,54 +13,113 @@ export interface Personagem {
   criadoEm: string;
 }
 
-let personagens: Personagem[] = [];
-let nextId = 1;
+// Helper para converter o row do banco de volta para a interface original
+function mapRowToPersonagem(row: any): Personagem {
+  return {
+    id: row.id,
+    nome: row.nome,
+    classe: row.classe,
+    raca: row.raca,
+    origem: row.origem,
+    nivel: row.nivel,
+    atributos: {
+      forca: row.forca,
+      destreza: row.destreza,
+      constituicao: row.constituicao,
+      inteligencia: row.inteligencia,
+      sabedoria: row.sabedoria,
+      carisma: row.carisma,
+    },
+    campanhaId: row.campanhaId,
+    criadoEm: row.criadoEm,
+  };
+}
 
 export const personagemModel = {
   listarTodos(): Personagem[] {
-    return personagens;
+    const stmt = db.prepare('SELECT * FROM personagens');
+    const rows = stmt.all();
+    return rows.map(mapRowToPersonagem);
   },
 
   listarPorCampanha(campanhaId: number): Personagem[] {
-    return personagens.filter((personagem) => personagem.campanhaId === campanhaId);
+    const stmt = db.prepare('SELECT * FROM personagens WHERE campanhaId = ?');
+    const rows = stmt.all(campanhaId);
+    return rows.map(mapRowToPersonagem);
   },
 
   buscarPorId(id: number): Personagem | null {
-    return personagens.find((personagem) => personagem.id === id) || null;
+    const stmt = db.prepare('SELECT * FROM personagens WHERE id = ?');
+    const row = stmt.get(id);
+    return row ? mapRowToPersonagem(row) : null;
   },
 
   inserir(dados: Omit<Personagem, 'id' | 'criadoEm'>): Personagem {
-    const novoPersonagem: Personagem = {
-      id: nextId++,
-      ...dados,
-      criadoEm: new Date().toISOString(),
-    };
+    const criadoEm = new Date().toISOString();
+    const stmt = db.prepare(`
+      INSERT INTO personagens (
+        nome, classe, raca, origem, nivel,
+        forca, destreza, constituicao, inteligencia, sabedoria, carisma,
+        campanhaId, criadoEm
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
 
-    personagens.push(novoPersonagem);
-    return novoPersonagem;
+    const info = stmt.run(
+      dados.nome, dados.classe, dados.raca, dados.origem, dados.nivel,
+      dados.atributos.forca, dados.atributos.destreza, dados.atributos.constituicao,
+      dados.atributos.inteligencia, dados.atributos.sabedoria, dados.atributos.carisma,
+      dados.campanhaId || null, criadoEm
+    );
+
+    return {
+      id: info.lastInsertRowid as number,
+      ...dados,
+      criadoEm,
+    };
   },
 
   atualizar(id: number, dados: Partial<Omit<Personagem, 'id' | 'criadoEm'>>): Personagem | null {
-    const index = personagens.findIndex((personagem) => personagem.id === id);
-    if (index === -1) return null;
+    const personagemAtual = this.buscarPorId(id);
+    if (!personagemAtual) return null;
 
-    const atributosAtualizados = dados.atributos
-      ? { ...personagens[index].atributos, ...dados.atributos }
-      : personagens[index].atributos;
+    const nome = dados.nome !== undefined ? dados.nome : personagemAtual.nome;
+    const classe = dados.classe !== undefined ? dados.classe : personagemAtual.classe;
+    const raca = dados.raca !== undefined ? dados.raca : personagemAtual.raca;
+    const origem = dados.origem !== undefined ? dados.origem : personagemAtual.origem;
+    const nivel = dados.nivel !== undefined ? dados.nivel : personagemAtual.nivel;
+    const campanhaId = dados.campanhaId !== undefined ? dados.campanhaId : personagemAtual.campanhaId;
 
-    personagens[index] = {
-      ...personagens[index],
-      ...dados,
-      atributos: atributosAtualizados,
-      id,
+    const atributos = {
+      ...personagemAtual.atributos,
+      ...dados.atributos,
     };
 
-    return personagens[index];
+    const stmt = db.prepare(`
+      UPDATE personagens SET
+        nome = ?, classe = ?, raca = ?, origem = ?, nivel = ?,
+        forca = ?, destreza = ?, constituicao = ?, inteligencia = ?, sabedoria = ?, carisma = ?,
+        campanhaId = ?
+      WHERE id = ?
+    `);
+
+    stmt.run(
+      nome, classe, raca, origem, nivel,
+      atributos.forca, atributos.destreza, atributos.constituicao,
+      atributos.inteligencia, atributos.sabedoria, atributos.carisma,
+      campanhaId || null, id
+    );
+
+    return {
+      ...personagemAtual,
+      nome, classe, raca, origem, nivel,
+      atributos,
+      campanhaId,
+    };
   },
 
   remover(id: number): boolean {
-    const tamanhoAntes = personagens.length;
-    personagens = personagens.filter((personagem) => personagem.id !== id);
-    return personagens.length < tamanhoAntes;
+    const stmt = db.prepare('DELETE FROM personagens WHERE id = ?');
+    const info = stmt.run(id);
+    return info.changes > 0;
   },
 };

@@ -129,10 +129,12 @@ export const personagemService = {
         throw new HttpError('O filtro "campanhaId" deve ser numerico', 400);
       }
 
-      return personagemModel.listarPorCampanha(id).map(adicionarBonusProficiencia);
+      const personagens = personagemModel.listarPorCampanha(id);
+      return personagens.map(adicionarBonusProficiencia);
     }
 
-    return personagemModel.listarTodos().map(adicionarBonusProficiencia);
+    const personagens = personagemModel.listarTodos();
+    return personagens.map(adicionarBonusProficiencia);
   },
 
   buscarPorId(id: number): PersonagemComBonus {
