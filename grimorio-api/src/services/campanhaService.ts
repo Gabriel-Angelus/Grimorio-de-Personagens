@@ -7,6 +7,10 @@ interface DadosCampanha {
   descricao?: string | null;
 }
 
+function normalizarTextoOpcional(valor: string | null | undefined): string | null {
+  return valor?.trim() || null;
+}
+
 function normalizarDados(dados: DadosCampanha): Omit<Campanha, 'id' | 'criadaEm'> {
   const nome = dados.nome?.trim();
   if (!nome) {
@@ -15,7 +19,7 @@ function normalizarDados(dados: DadosCampanha): Omit<Campanha, 'id' | 'criadaEm'
 
   return {
     nome,
-    descricao: dados.descricao?.trim() || null,
+    descricao: normalizarTextoOpcional(dados.descricao),
   };
 }
 
@@ -31,7 +35,7 @@ function normalizarAtualizacao(dados: DadosCampanha): Partial<Omit<Campanha, 'id
   }
 
   if (dados.descricao !== undefined) {
-    atualizacao.descricao = dados.descricao?.trim() || null;
+    atualizacao.descricao = normalizarTextoOpcional(dados.descricao);
   }
 
   return atualizacao;

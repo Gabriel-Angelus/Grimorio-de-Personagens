@@ -1,6 +1,6 @@
 import { campanhaModel } from '../models/campanha.js';
 import { personagemModel, type Personagem } from '../models/personagem.js';
-import type { Atributos } from '../types/atributos.js';
+import type { Atributos, NomeAtributo } from '../types/atributos.js';
 import { HttpError } from '../types/httpError.js';
 import { calcularModificadores } from './modificadorService.js';
 
@@ -9,6 +9,7 @@ interface DadosPersonagem {
   classe?: string;
   raca?: string;
   origem?: string;
+  descricao?: string | null;
   nivel?: number;
   atributos?: Partial<Atributos>;
   campanhaId?: number | null;
@@ -18,7 +19,11 @@ type PersonagemComBonus = Personagem & {
   bonusProficiencia: Atributos;
 };
 
-const nomesAtributos: Array<keyof Atributos> = [
+const NIVEL_MINIMO = 1;
+const NIVEL_MAXIMO = 20;
+const ATRIBUTO_MINIMO = 1;
+const ATRIBUTO_MAXIMO = 20;
+const nomesAtributos: NomeAtributo[] = [
   'forca',
   'destreza',
   'constituicao',
@@ -43,9 +48,13 @@ function validarTexto(valor: string | undefined, campo: string): string {
   return texto;
 }
 
+function normalizarTextoOpcional(valor: string | null | undefined): string | null {
+  return valor?.trim() || null;
+}
+
 function validarNivel(nivel: number | undefined): number {
   const numero = Number(nivel);
-  if (!Number.isInteger(numero) || numero < 1 || numero > 20) {
+  if (!Number.isInteger(numero) || numero < NIVEL_MINIMO || numero > NIVEL_MAXIMO) {
     throw new HttpError('O campo "nivel" deve ser um numero inteiro entre 1 e 20', 400);
   }
 
@@ -61,7 +70,7 @@ function validarAtributos(atributos: Partial<Atributos> | undefined): Atributos 
 
   for (const nomeAtributo of nomesAtributos) {
     const valor = Number(atributos[nomeAtributo]);
-    if (!Number.isInteger(valor) || valor < 1 || valor > 20) {
+    if (!Number.isInteger(valor) || valor < ATRIBUTO_MINIMO || valor > ATRIBUTO_MAXIMO) {
       throw new HttpError(`O atributo "${nomeAtributo}" deve ser um numero inteiro entre 1 e 20`, 400);
     }
 
@@ -95,6 +104,7 @@ function normalizarCriacao(dados: DadosPersonagem): Omit<Personagem, 'id' | 'cri
     classe: validarTexto(dados.classe, 'classe'),
     raca: validarTexto(dados.raca, 'raca'),
     origem: validarTexto(dados.origem, 'origem'),
+    descricao: normalizarTextoOpcional(dados.descricao),
     nivel: validarNivel(dados.nivel),
     atributos: validarAtributos(dados.atributos),
     campanhaId: validarCampanha(dados.campanhaId),
@@ -108,6 +118,7 @@ function normalizarAtualizacao(personagemAtual: Personagem, dados: DadosPersonag
   if (dados.classe !== undefined) atualizacao.classe = validarTexto(dados.classe, 'classe');
   if (dados.raca !== undefined) atualizacao.raca = validarTexto(dados.raca, 'raca');
   if (dados.origem !== undefined) atualizacao.origem = validarTexto(dados.origem, 'origem');
+  if (dados.descricao !== undefined) atualizacao.descricao = normalizarTextoOpcional(dados.descricao);
   if (dados.nivel !== undefined) atualizacao.nivel = validarNivel(dados.nivel);
   if (dados.campanhaId !== undefined) atualizacao.campanhaId = validarCampanha(dados.campanhaId);
 

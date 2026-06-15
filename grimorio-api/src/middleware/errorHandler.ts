@@ -1,7 +1,7 @@
 import type { ErrorRequestHandler } from 'express';
 import { HttpError } from '../types/httpError.js';
 
-export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   console.error(`[${req.method} ${req.url}] ${err.message}`);
 
   const status = err instanceof HttpError ? err.status : 500;

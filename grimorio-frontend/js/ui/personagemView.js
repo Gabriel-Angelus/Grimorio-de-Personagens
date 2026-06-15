@@ -11,6 +11,33 @@ const icones = {
   Arqueiro: '🏹',
 };
 
+const descricoesPorOrigem = {
+  Academico: 'Passou anos enfurnado em bibliotecas poeirentas, buscando decifrar enigmas esquecidos.',
+  Nobre: 'Cresceu em cortes luxuosas, mas decidiu trocar as intrigas palacianas pelos perigos do mundo.',
+  Campones: 'Trabalhava de sol a sol nas colheitas até que um evento marcante mudou seu destino para sempre.',
+  Mercenario: 'Sua lealdade tem um preço, vendendo suas habilidades para quem puder pagar mais moedas de ouro.',
+  Soldado: 'Sobreviveu a batalhas sangrentas, onde aprendeu que a disciplina e o treinamento são as verdadeiras armas.',
+  Orfao: 'Criado nas ruas frias e vielas escuras, aprendeu sozinho a sobreviver em um mundo cruel.',
+};
+
+const descricoesPorClasse = {
+  Guerreiro: 'Agora empunha sua arma com maestria na linha de frente.',
+  Mago: 'Sua conexão com as energias arcanas permite manipular a própria realidade.',
+  Ladino: 'Movendo-se em silêncio, confia em seus reflexos rápidos e lâminas ocultas.',
+  Clerigo: 'Canaliza o poder de sua fé para curar aliados e punir a escuridão.',
+  Bardo: 'Suas histórias e canções inspiram coragem onde só havia desespero.',
+  Arqueiro: 'Com olhos de águia, abate seus inimigos muito antes que eles percebam o perigo.',
+};
+
+const caracteristicasPorOrigem = {
+  Academico: 'Sempre com a mente nos livros, busca os conhecimentos antigos e os feitiços perdidos no tempo.',
+  Nobre: 'Porta o brasão de sua família com o peso e a autoridade que o sangue exige.',
+  Campones: 'Costumava arar as terras antes que uma jornada inusitada o empurrasse para os braços da aventura.',
+  Mercenario: 'Sobrevive de contratos, onde sua lâmina corta fielmente a quem estiver pagando o ouro.',
+  Soldado: 'Veterano endurecido pelas marchas militares, cuja disciplina moldou sua força.',
+  Orfao: 'Sem berço ou nome herdado, aprendeu tudo sobre astúcia se esgueirando pelas sarjetas.',
+};
+
 function escapeHtml(valor = '') {
   return String(valor).replace(/[&<>"']/g, (char) => ({
     '&': '&amp;',
@@ -21,14 +48,21 @@ function escapeHtml(valor = '') {
   })[char]);
 }
 
-function resumo(personagem) {
-  const textos = {
-    Orfao: 'Nascida nos becos úmidos de Porto da Adaga, aprendeu a deslizar pelas sombras antes mesmo de saber ler.',
-    Soldado: 'Ex-líder da lendária Guarda de Ferro sob a Montanha de Karak. Suas pesadas placas contam vitórias antigas.',
-    Nobre: 'Um elfo silencioso que busca decifrar o Alfabeto Rúnico de Ouro Perdido nas ruínas do norte.',
-  };
-  const texto = textos[personagem.origem] || 'Aventureiro registrado nas crônicas do Grimório, pronto para uma nova jornada.';
-  return texto.length > 116 ? `${texto.slice(0, 116).trim()}...` : texto;
+function getDescricao(personagem) {
+  if (personagem.descricao) {
+    return personagem.descricao;
+  }
+  
+  const { classe, origem } = personagem;
+  const baseOrigem = descricoesPorOrigem[origem] || 'Aventureiro registrado nas crônicas do Grimório.';
+  const baseClasse = descricoesPorClasse[classe] || 'Pronto para uma nova jornada heroica.';
+  
+  return `${baseOrigem} ${baseClasse}`;
+}
+
+function resumo(personagem, truncate = false) {
+  const texto = getDescricao(personagem);
+  return truncate && texto.length > 116 ? `${texto.slice(0, 116).trim()}...` : texto;
 }
 
 function header() {
@@ -107,7 +141,7 @@ function card(personagem) {
           <span class="tag primary">${icones[personagem.classe] || '✦'} ${escapeHtml(personagem.classe)}</span>
           <span class="tag">${escapeHtml(personagem.raca)}</span>
         </div>
-        <p>${escapeHtml(resumo(personagem))}</p>
+        <p>${escapeHtml(resumo(personagem, true))}</p>
         <div class="mini-attrs">
           ${attrMini(personagem, 'forca', 'FOR')}
           ${attrMini(personagem, 'destreza', 'DES')}
@@ -249,7 +283,7 @@ function detalhe() {
             </div>
             <div class="features">
               <h4>📖 Características do Grimório</h4>
-              <p><strong>Origem (${escapeHtml(p.origem)}):</strong> ficha vinculada às crônicas da mesa.</p>
+              <p><strong>Origem (${escapeHtml(p.origem)}):</strong> ${caracteristicasPorOrigem[p.origem] || 'ficha vinculada às crônicas da mesa.'}</p>
               <p><strong>Vocação (${escapeHtml(p.classe)}):</strong> nível ${p.nivel}, ${escapeHtml(p.raca)}.</p>
             </div>
           </section>
@@ -266,7 +300,42 @@ function detalhe() {
   `;
 }
 
+function confirmacaoRemocao() {
+  const p = state.personagemParaRemover;
+  if (!p) return '';
+
+  return `
+    <div class="sheet-modal">
+      <article class="sheet-detail confirm-modal">
+        <button class="close-btn" data-action="cancelar-remocao">×</button>
+        <h2>☠️ Banir Aventureiro</h2>
+        <div class="confirm-box">
+          <p class="confirm-title">Tem certeza de que deseja banir <strong>${escapeHtml(p.nome)}</strong> do Grimório?</p>
+          <p class="support">Este aventureiro será removido permanentemente das crônicas. Esta ação não pode ser desfeita.</p>
+        </div>
+        <footer>
+          <span></span>
+          <div>
+            <button class="btn btn-outline-gold" data-action="cancelar-remocao">Cancelar</button>
+            <button class="btn btn-danger" data-action="confirmar-remocao">Banir Permanentemente</button>
+          </div>
+        </footer>
+      </article>
+    </div>
+  `;
+}
+
 export function render(callbacks) {
+  const activeElement = document.activeElement;
+  const activeFilter = activeElement?.dataset?.filter;
+  let cursorStart = null;
+  let cursorEnd = null;
+  
+  if (activeFilter && activeElement.tagName === 'INPUT') {
+    cursorStart = activeElement.selectionStart;
+    cursorEnd = activeElement.selectionEnd;
+  }
+
   const app = document.querySelector('#app');
   app.innerHTML = `
     ${header()}
@@ -276,6 +345,7 @@ export function render(callbacks) {
       ${state.carregando ? '<p class="empty">Abrindo o grimório...</p>' : state.tela === 'lista' ? lista() : formulario()}
     </main>
     ${detalhe()}
+    ${confirmacaoRemocao()}
   `;
 
   app.querySelector('[data-action="novo"]')?.addEventListener('click', callbacks.novo);
@@ -304,4 +374,18 @@ export function render(callbacks) {
 
   app.querySelectorAll('[data-action="fechar"]').forEach((botao) => botao.addEventListener('click', callbacks.fecharDetalhe));
   app.querySelector('[data-action="editar-detalhe"]')?.addEventListener('click', callbacks.editarDetalhe);
+  app.querySelectorAll('[data-action="cancelar-remocao"]').forEach((botao) => botao.addEventListener('click', callbacks.cancelarRemocao));
+  app.querySelector('[data-action="confirmar-remocao"]')?.addEventListener('click', callbacks.confirmarRemocao);
+
+  if (activeFilter) {
+    requestAnimationFrame(() => {
+      const elToFocus = app.querySelector(`[data-filter="${activeFilter}"]`);
+      if (elToFocus) {
+        elToFocus.focus();
+        if (elToFocus.tagName === 'INPUT' && cursorStart !== null) {
+          elToFocus.setSelectionRange(cursorStart, cursorEnd);
+        }
+      }
+    });
+  }
 }

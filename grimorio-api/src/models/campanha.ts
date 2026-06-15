@@ -7,51 +7,62 @@ export interface Campanha {
   criadaEm: string;
 }
 
+type DadosCampanha = Omit<Campanha, 'id' | 'criadaEm'>;
+
+function normalizarDescricao(descricao: string | null | undefined): string | null {
+  return descricao || null;
+}
+
 export const campanhaModel = {
   listarTodas(): Campanha[] {
-    const stmt = db.prepare('SELECT * FROM campanhas');
-    return stmt.all() as Campanha[];
+    return db.prepare('SELECT * FROM campanhas').all() as Campanha[];
   },
 
   buscarPorId(id: number): Campanha | null {
-    const stmt = db.prepare('SELECT * FROM campanhas WHERE id = ?');
-    const result = stmt.get(id) as Campanha | undefined;
-    return result || null;
+    const campanha = db.prepare('SELECT * FROM campanhas WHERE id = ?').get(id) as
+      | Campanha
+      | undefined;
+    return campanha || null;
   },
 
-  inserir(dados: Omit<Campanha, 'id' | 'criadaEm'>): Campanha {
+  inserir(dados: DadosCampanha): Campanha {
     const criadaEm = new Date().toISOString();
-    const stmt = db.prepare('INSERT INTO campanhas (nome, descricao, criadaEm) VALUES (?, ?, ?)');
-    const info = stmt.run(dados.nome, dados.descricao || null, criadaEm);
-    
+    const descricao = normalizarDescricao(dados.descricao);
+    const info = db
+      .prepare('INSERT INTO campanhas (nome, descricao, criadaEm) VALUES (?, ?, ?)')
+      .run(dados.nome, descricao, criadaEm);
+
     return {
       id: info.lastInsertRowid as number,
       nome: dados.nome,
-      descricao: dados.descricao || null,
+      descricao,
       criadaEm,
     };
   },
 
-  atualizar(id: number, dados: Partial<Omit<Campanha, 'id' | 'criadaEm'>>): Campanha | null {
+  atualizar(id: number, dados: Partial<DadosCampanha>): Campanha | null {
     const campanhaAtual = this.buscarPorId(id);
     if (!campanhaAtual) return null;
 
     const nome = dados.nome !== undefined ? dados.nome : campanhaAtual.nome;
     const descricao = dados.descricao !== undefined ? dados.descricao : campanhaAtual.descricao;
+    const descricaoNormalizada = normalizarDescricao(descricao);
 
-    const stmt = db.prepare('UPDATE campanhas SET nome = ?, descricao = ? WHERE id = ?');
-    stmt.run(nome, descricao, id);
+    db.prepare('UPDATE campanhas SET nome = ?, descricao = ? WHERE id = ?').run(
+      nome,
+      descricaoNormalizada,
+      id,
+    );
 
     return {
       ...campanhaAtual,
       nome,
-      descricao: descricao || null,
+      descricao: descricaoNormalizada,
     };
   },
 
   remover(id: number): boolean {
-    const stmt = db.prepare('DELETE FROM campanhas WHERE id = ?');
-    const info = stmt.run(id);
+    const info = db.prepare('DELETE FROM campanhas WHERE id = ?').run(id);
     return info.changes > 0;
   },
 };

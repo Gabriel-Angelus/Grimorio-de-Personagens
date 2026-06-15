@@ -1,162 +1,102 @@
-# Grimório RPG
+# Grimorio RPG - Gerenciador de Personagens
 
-Projeto fullstack simples para criação, visualização e armazenamento de fichas de personagens de RPG no estilo D&D.
+## Ideia do Projeto
 
-A aplicação permite cadastrar personagens, organizar fichas em campanhas, filtrar a biblioteca de heróis e visualizar os atributos principais com seus modificadores.
+O Grimorio RPG e uma aplicacao fullstack para criacao, organizacao e consulta de fichas de personagens de RPG no estilo D&D.
 
-## Tecnologias
+O sistema permite cadastrar personagens, editar fichas, remover registros, visualizar detalhes em modal, filtrar a biblioteca de herois e vincular personagens a campanhas.
 
-- HTML5
-- CSS3
-- Bootstrap
-- JavaScript puro com módulos ES
-- Node.js
-- Express.js
-- API REST
-- Armazenamento em memória no backend
+O projeto segue a arquitetura em camadas ensinada em aula:
 
-## Funcionalidades
+| Camada | Organizacao |
+| --- | --- |
+| Backend | Express.js + TypeScript, seguindo `Route -> Controller -> Service -> Model -> SQLite` |
+| Frontend | HTML5 + Bootstrap + JavaScript puro, seguindo `Config -> API -> Services -> State -> UI -> Main` |
 
-- Listar personagens cadastrados.
-- Criar novo personagem.
-- Editar ficha existente.
-- Remover personagem.
-- Visualizar ficha completa em modal.
-- Filtrar por nome, classe, raça e origem.
-- Ordenar personagens por nome, nível ou data.
-- Cadastrar campanhas.
-- Vincular personagem a uma campanha.
-- Calcular modificadores dos atributos.
+## Funcionalidades Principais
 
-## Classes principais
+- CRUD completo de personagens: criar, listar, editar, remover e detalhar.
+- Cadastro e listagem de campanhas.
+- Vinculo de personagens com campanhas.
+- Filtros por nome, classe, raca e origem.
+- Ordenacao por nome, nivel e data de criacao.
+- Calculo automatico dos modificadores de atributos.
+- Persistencia dos dados em SQLite apos reiniciar a API.
 
-### Personagem
+## Classes do Dominio
 
-Representa uma ficha de RPG.
+### 1. Personagem
 
-Campos principais:
+Representa uma ficha de personagem de RPG.
 
-- `id`
-- `nome`
-- `classe`
-- `raca`
-- `origem`
-- `nivel`
-- `atributos`
-- `campanhaId`
+| Atributo | Tipo | Descricao |
+| --- | --- | --- |
+| `id` | number | Identificador unico auto-incrementado |
+| `nome` | string | Nome do personagem |
+| `classe` | string | Classe ou vocacao do personagem |
+| `raca` | string | Raca do personagem |
+| `origem` | string | Origem narrativa do personagem |
+| `descricao` | string | Historia ou descricao fisica |
+| `nivel` | number | Nivel entre 1 e 20 |
+| `atributos` | object | Valores de forca, destreza, constituicao, inteligencia, sabedoria e carisma |
+| `campanhaId` | number/null | FK para a campanha vinculada |
+| `criadoEm` | string | Timestamp de criacao |
 
-Responsável por guardar os dados centrais da ficha e permitir a exibição dos modificadores de atributos.
+### 2. Campanha
 
-### Atributos
+Representa uma aventura ou grupo de jogo.
 
-Representa os seis atributos básicos do personagem:
+| Atributo | Tipo | Descricao |
+| --- | --- | --- |
+| `id` | number | Identificador unico auto-incrementado |
+| `nome` | string | Nome da campanha |
+| `descricao` | string/null | Breve descricao da campanha |
+| `criadaEm` | string | Timestamp de criacao |
 
-- `forca`
-- `destreza`
-- `constituicao`
-- `inteligencia`
-- `sabedoria`
-- `carisma`
+### 3. Atributos
 
-O modificador é calculado com a regra:
+Representa os seis atributos principais de uma ficha.
+
+| Atributo | Tipo | Descricao |
+| --- | --- | --- |
+| `forca` | number | Poder fisico |
+| `destreza` | number | Agilidade e reflexos |
+| `constituicao` | number | Resistencia e vitalidade |
+| `inteligencia` | number | Raciocinio e conhecimento |
+| `sabedoria` | number | Percepcao e intuicao |
+| `carisma` | number | Presenca e persuasao |
+
+O modificador e calculado com:
 
 ```js
 Math.floor((atributo - 10) / 2)
 ```
 
-### Campanha
+## Tecnologias
 
-Representa uma aventura ou grupo de jogo.
+| Camada | Tecnologia |
+| --- | --- |
+| Backend | Node.js + Express.js + TypeScript |
+| Banco de dados | SQLite + better-sqlite3 |
+| Frontend | HTML5 + Bootstrap 5 + JavaScript puro |
+| Estilo | Bootstrap 5 + CSS customizado |
+| Build | tsc |
+| Testes | node:test + tsx |
 
-Campos principais:
+## Persistencia com SQLite
 
-- `id`
-- `nome`
-- `descricao`
-- `criadaEm`
+O schema e criado em `grimorio-api/src/db.ts`.
 
-Uma campanha pode agrupar vários personagens.
+| Tabela | Finalidade |
+| --- | --- |
+| `campanhas` | Armazena campanhas cadastradas |
+| `personagens` | Armazena fichas de personagens |
 
-## Funções e camadas importantes
+A tabela `personagens` possui FK para `campanhas` por meio de `campanhaId`.
 
-### Backend
+Arquivos de banco (`*.db`) sao dados locais de execucao e nao devem ser versionados.
 
-Fluxo:
-
-```txt
-Route -> Controller -> Service -> Model
-```
-
-Principais responsabilidades:
-
-- `routes`: definem os endpoints da API.
-- `controllers`: recebem as requisições e enviam respostas.
-- `services`: concentram regras de negócio e validações.
-- `models`: armazenam os dados em memória.
-- `middleware`: registra logs e trata erros.
-
-Endpoints principais:
-
-```txt
-GET    /personagens
-GET    /personagens/:id
-POST   /personagens
-PUT    /personagens/:id
-DELETE /personagens/:id
-
-GET    /campanhas
-GET    /campanhas/:id
-POST   /campanhas
-PUT    /campanhas/:id
-DELETE /campanhas/:id
-```
-
-### Frontend
-
-Fluxo:
-
-```txt
-Evento da tela -> main.js -> service -> api.js -> backend
-```
-
-Principais responsabilidades:
-
-- `api.js`: centraliza as chamadas `fetch`.
-- `services`: acessam a API por entidade.
-- `state`: mantém filtros, tela atual e dados carregados.
-- `ui`: renderiza cards, filtros, formulário e modal.
-- `main.js`: conecta eventos da interface com os serviços.
-
-## Estrutura
-
-```txt
-grimorio-api/
-+-- src/
-|   +-- app.ts
-|   +-- server.ts
-|   +-- routes/
-|   +-- controllers/
-|   +-- services/
-|   +-- models/
-|   +-- middleware/
-+-- package.json
-
-grimorio-frontend/
-+-- index.html
-+-- css/
-|   +-- style.css
-+-- js/
-|   +-- config.js
-|   +-- api.js
-|   +-- main.js
-|   +-- services/
-|   +-- ui/
-|   +-- state/
-+-- frontend-server.js
-+-- package.json
-```
-
-## Como rodar
+## Como Rodar
 
 ### Backend
 
@@ -166,11 +106,7 @@ npm install
 npm run dev
 ```
 
-A API fica disponível em:
-
-```txt
-http://localhost:3000
-```
+A API fica em `http://localhost:3000`.
 
 ### Frontend
 
@@ -179,12 +115,13 @@ cd grimorio-frontend
 npm run dev
 ```
 
-O frontend fica disponível em:
+O frontend fica em `http://localhost:5500`.
 
-```txt
-http://localhost:5500
-```
+## Scripts da API
 
-## Observação
-
-O backend usa armazenamento em memória. Ao reiniciar a API, os dados cadastrados são apagados.
+| Comando | Descricao |
+| --- | --- |
+| `npm run dev` | Inicia a API em desenvolvimento |
+| `npm run build` | Compila o TypeScript |
+| `npm start` | Executa a versao compilada |
+| `npm test` | Executa os testes automatizados |

@@ -4,14 +4,13 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.npm_lifecycle_event === 'test';
 
-const dbPath = path.resolve(__dirname, '..', 'data.db');
+const dbPath = isTestEnvironment ? ':memory:' : path.resolve(__dirname, '..', 'data.db');
 const db = new Database(dbPath);
 
-// Ativa as foreign keys no SQLite (por padrão vêm desativadas)
 db.pragma('foreign_keys = ON');
 
-// Criação das tabelas
 db.exec(`
   CREATE TABLE IF NOT EXISTS campanhas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,6 +25,7 @@ db.exec(`
     classe TEXT NOT NULL,
     raca TEXT NOT NULL,
     origem TEXT NOT NULL,
+    descricao TEXT,
     nivel INTEGER NOT NULL,
     forca INTEGER NOT NULL,
     destreza INTEGER NOT NULL,
@@ -38,5 +38,14 @@ db.exec(`
     FOREIGN KEY (campanhaId) REFERENCES campanhas (id) ON DELETE SET NULL
   );
 `);
+
+const colunasPersonagens = db
+  .prepare('PRAGMA table_info(personagens)')
+  .all() as Array<{ name: string }>;
+const possuiDescricao = colunasPersonagens.some((coluna) => coluna.name === 'descricao');
+
+if (!possuiDescricao) {
+  db.exec('ALTER TABLE personagens ADD COLUMN descricao TEXT');
+}
 
 export default db;

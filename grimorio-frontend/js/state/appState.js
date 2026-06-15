@@ -9,6 +9,7 @@ export const state = {
   campanhas: [],
   personagemSelecionado: null,
   personagemEditando: null,
+  personagemParaRemover: null,
   filtros: {
     busca: '',
     classe: 'Todas',
@@ -36,7 +37,7 @@ export function personagensFiltrados() {
 
   return [...state.personagens]
     .filter((personagem) => {
-      const nomeOk = !busca || personagem.nome.toLowerCase().includes(busca);
+      const nomeOk = !busca || personagem.nome.toLowerCase().startsWith(busca);
       const classeOk = state.filtros.classe === 'Todas' || personagem.classe === state.filtros.classe;
       const racaOk = state.filtros.raca === 'Todas' || personagem.raca === state.filtros.raca;
       const origemOk = state.filtros.origem === 'Todas' || personagem.origem === state.filtros.origem;

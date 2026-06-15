@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const root = __dirname;
+const root = path.resolve(__dirname);
 const port = Number(process.env.PORT) || 5500;
 
 const tipos = {
@@ -17,10 +17,10 @@ const tipos = {
 
 http
   .createServer((req, res) => {
-    const url = decodeURIComponent(req.url.split('?')[0]);
-    const arquivo = path.join(root, url === '/' ? 'index.html' : url);
+    const url = decodeURIComponent((req.url || '/').split('?')[0]);
+    const arquivo = path.resolve(root, url === '/' ? 'index.html' : `.${url}`);
 
-    if (!arquivo.startsWith(root)) {
+    if (arquivo !== root && !arquivo.startsWith(`${root}${path.sep}`)) {
       res.writeHead(403);
       res.end('Forbidden');
       return;

@@ -1,14 +1,17 @@
 :root {
-  --bg: #0c0703;
-  --surface: #171007;
-  --surface-2: #21170c;
-  --line: #5a3f17;
-  --gold: #e0bb34;
-  --gold-2: #f2cf45;
-  --text: #f7efe1;
-  --muted: #a99c86;
-  --danger: #ff465d;
-  --shadow: 0 22px 50px rgba(0, 0, 0, 0.45);
+  --bg: #070d0a;
+  --surface: #0d1f17;
+  --surface-2: #122a1e;
+  --line: #1f6f4a;
+  --purple: #7b2cbf;
+  --purple-2: #9b3def;
+  --purple-glow: rgba(123, 44, 191, 0.35);
+  --mint: #5fd38d;
+  --mint-dim: #3aa86a;
+  --text: #f2e9e4;
+  --muted: #9ab8ac;
+  --danger: #e05270;
+  --shadow: 0 22px 50px rgba(0, 0, 0, 0.55);
   --content-width: 1680px;
 }
 
@@ -21,8 +24,9 @@ body {
   margin: 0;
   color: var(--text);
   background:
-    radial-gradient(circle at 20% 15%, rgba(224, 187, 52, 0.08), transparent 30%),
-    linear-gradient(180deg, #0b0703 0%, #120b05 46%, #070503 100%);
+    radial-gradient(ellipse at 10% 0%, rgba(123, 44, 191, 0.12), transparent 40%),
+    radial-gradient(ellipse at 90% 100%, rgba(31, 111, 74, 0.1), transparent 40%),
+    linear-gradient(180deg, #060c09 0%, #0a1910 50%, #060c09 100%);
   font-family: Georgia, "Times New Roman", serif;
 }
 
@@ -45,8 +49,9 @@ main.container-xl {
 
 .topbar {
   min-height: 92px;
-  border-bottom: 2px solid var(--gold);
-  background: rgba(12, 7, 3, 0.92);
+  border-bottom: 2px solid var(--purple);
+  background: rgba(7, 13, 10, 0.96);
+  box-shadow: 0 2px 24px rgba(123, 44, 191, 0.18);
 }
 
 .topbar-inner {
@@ -60,9 +65,9 @@ main.container-xl {
 .topbar h1,
 .form-title h2 {
   margin: 0;
-  color: var(--gold-2);
+  color: var(--purple-2);
   text-transform: uppercase;
-  text-shadow: 0 0 14px rgba(224, 187, 52, 0.55);
+  text-shadow: 0 0 18px rgba(123, 44, 191, 0.7), 0 0 40px rgba(123, 44, 191, 0.3);
   font-weight: 800;
   letter-spacing: 0;
 }
@@ -78,20 +83,22 @@ main.container-xl {
   align-items: center;
 }
 
+/* ── Botão primário (roxo) ── */
 .btn-gold {
   min-height: 56px;
   padding: 0 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #a77d10;
+  border: 1px solid #5a1a9a;
   border-radius: 5px;
-  background: linear-gradient(180deg, #e6c449, #d4a925);
-  color: #120b05;
+  background: linear-gradient(180deg, #9b3def, #7b2cbf);
+  color: #f2e9e4;
   font-weight: 800;
   font-size: 1.04rem;
   text-transform: uppercase;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 16px rgba(123, 44, 191, 0.3);
+  cursor: pointer;
 }
 
 .new-legend-row .btn-gold {
@@ -108,32 +115,59 @@ main.container-xl {
 }
 
 .btn-gold:hover {
-  background: linear-gradient(180deg, #f1d65a, #ddb22c);
-  color: #120b05;
+  background: linear-gradient(180deg, #ab4fff, #8f33d9);
+  color: #fff;
+  box-shadow: 0 0 24px rgba(123, 44, 191, 0.5);
 }
 
+/* ── Botão perigo ── */
+.btn-danger {
+  min-height: 56px;
+  padding: 0 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #8c1a30;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #e05270, #b83050);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.04rem;
+  text-transform: uppercase;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(180deg, #f06080, #cc3d60);
+  color: #fff;
+}
+
+/* ── Botão contorno ── */
 .btn-outline-gold {
   min-height: 52px;
   padding: 0 28px;
-  border: 1px solid var(--gold);
+  border: 1px solid var(--purple);
   border-radius: 5px;
-  color: var(--gold);
+  color: var(--purple-2);
   background: transparent;
   font-weight: 800;
   font-size: 1.02rem;
   text-transform: uppercase;
+  cursor: pointer;
 }
 
 .btn-outline-gold:hover {
-  border-color: var(--gold-2);
-  color: var(--gold-2);
+  border-color: var(--purple-2);
+  color: #fff;
+  background: rgba(123, 44, 191, 0.12);
 }
 
 .panel {
   position: relative;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(18, 11, 5, 0.94);
+  background: rgba(13, 31, 23, 0.96);
   box-shadow: var(--shadow);
 }
 
@@ -157,7 +191,7 @@ main.container-xl {
 .filter-field span,
 .field span,
 .sheet-form h3 {
-  color: #fff6e8;
+  color: #d4ede0;
   font-size: 1.12rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -167,21 +201,22 @@ main.container-xl {
   min-height: 54px;
   border: 1px solid var(--line);
   border-radius: 5px;
-  background-color: #0b0703;
+  background-color: #080f0b;
   color: var(--text);
   font-weight: 700;
   font-size: 1.03rem;
 }
 
 .grim-input:focus {
-  border-color: var(--gold);
-  background-color: #0b0703;
+  border-color: var(--purple);
+  background-color: #080f0b;
   color: var(--text);
-  box-shadow: 0 0 0 0.18rem rgba(224, 187, 52, 0.18);
+  box-shadow: 0 0 0 0.18rem rgba(123, 44, 191, 0.22);
+  outline: none;
 }
 
 .grim-input::placeholder {
-  color: #766a58;
+  color: #4d7a63;
 }
 
 select.grim-input {
@@ -200,8 +235,8 @@ select.grim-input {
   border: 1px solid var(--line);
   border-right: 0;
   border-radius: 5px 0 0 5px;
-  background: #20170e;
-  color: #caa857;
+  background: #0f2a1c;
+  color: var(--mint);
   font-size: 1.45rem;
 }
 
@@ -223,20 +258,22 @@ select.grim-input {
   min-height: 575px;
   border: 1px solid var(--line);
   border-radius: 9px;
-  background: #1a1109;
+  background: #0d1f17;
   color: var(--text);
   box-shadow: var(--shadow);
   overflow: hidden;
   cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .character-card:hover {
-  border-color: var(--gold);
+  border-color: var(--purple);
+  box-shadow: 0 0 0 1px rgba(123, 44, 191, 0.25), var(--shadow);
 }
 
 .character-card:first-child {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 2px rgba(224, 187, 52, 0.18), var(--shadow);
+  border-color: var(--purple);
+  box-shadow: 0 0 0 2px rgba(123, 44, 191, 0.22), var(--shadow);
 }
 
 .character-card > i,
@@ -248,8 +285,8 @@ select.grim-input {
   left: 8px;
   width: 13px;
   height: 13px;
-  border-top: 1px solid var(--gold);
-  border-left: 1px solid var(--gold);
+  border-top: 1px solid var(--purple);
+  border-left: 1px solid var(--purple);
 }
 
 .character-card header {
@@ -259,14 +296,14 @@ select.grim-input {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-bottom: 1px solid #3c2a14;
+  border-bottom: 1px solid #1a3d28;
 }
 
 .character-card h2 {
   max-width: 100%;
   margin: 0;
   overflow: hidden;
-  color: var(--gold);
+  color: var(--mint);
   font-size: clamp(1.48rem, 1.55vw, 1.78rem);
   font-weight: 800;
   text-overflow: ellipsis;
@@ -282,8 +319,8 @@ select.grim-input {
   width: 24px;
   height: 24px;
   border-radius: 999px;
-  background: var(--gold);
-  color: #100b05;
+  background: var(--purple);
+  color: #f2e9e4;
   font-weight: 900;
   font-size: 1.02rem;
 }
@@ -298,19 +335,35 @@ select.grim-input {
   margin: 0 auto 24px;
   display: grid;
   place-items: center;
-  border: 2px solid var(--gold);
+  border: 2px solid var(--purple);
   border-radius: 999px;
-  background: radial-gradient(circle at 35% 30%, #056b55, #021c18 72%);
-  box-shadow: 0 0 20px rgba(224, 187, 52, 0.35);
+  background: radial-gradient(circle at 35% 30%, #1f6f4a, #07150e 72%);
+  box-shadow: 0 0 22px rgba(123, 44, 191, 0.4);
   font-size: 3.35rem;
 }
 
 .avatar.guerreiro {
-  background: radial-gradient(circle at 35% 30%, #8c0d0d, #2a0000 76%);
+  background: radial-gradient(circle at 35% 30%, #6b1a1a, #1a0505 76%);
 }
 
 .avatar.mago {
-  background: radial-gradient(circle at 35% 30%, #5f16a3, #1d063b 76%);
+  background: radial-gradient(circle at 35% 30%, #5a1a9e, #130430 76%);
+}
+
+.avatar.ladino {
+  background: radial-gradient(circle at 35% 30%, #1c5c3a, #060f08 76%);
+}
+
+.avatar.clerigo {
+  background: radial-gradient(circle at 35% 30%, #3a5c1c, #080f06 76%);
+}
+
+.avatar.bardo {
+  background: radial-gradient(circle at 35% 30%, #5c3a1c, #100806 76%);
+}
+
+.avatar.arqueiro {
+  background: radial-gradient(circle at 35% 30%, #1c3a5c, #060810 76%);
 }
 
 .tags {
@@ -326,15 +379,16 @@ select.grim-input {
   border: 1px solid var(--line);
   border-radius: 4px;
   color: var(--text);
-  background: #20160b;
+  background: #0f2a1e;
   font-size: 0.9rem;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .tag.primary {
-  border-color: var(--gold);
-  color: var(--gold);
+  border-color: var(--purple);
+  color: var(--purple-2);
+  background: rgba(123, 44, 191, 0.1);
 }
 
 .character-card p,
@@ -344,6 +398,8 @@ select.grim-input {
   font-size: 1.1rem;
   font-weight: 700;
   line-height: 1.45;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .mini-attrs {
@@ -351,8 +407,8 @@ select.grim-input {
   padding: 16px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  border: 1px solid #3c2a14;
-  background: #171007;
+  border: 1px solid #1a3d28;
+  background: #0a1a11;
 }
 
 .mini-attrs small,
@@ -373,7 +429,7 @@ select.grim-input {
 .mini-attrs em,
 .detail-attrs em,
 .stepper em {
-  color: var(--gold);
+  color: var(--mint);
   font-style: normal;
   font-weight: 800;
 }
@@ -391,9 +447,10 @@ select.grim-input {
   height: 38px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #2a1d10;
-  color: #d5c7ad;
+  background: #112a1c;
+  color: #a8d4bc;
   font-size: 1.12rem;
+  cursor: pointer;
 }
 
 .icon-btn.danger {
@@ -448,12 +505,12 @@ textarea.grim-input {
 
 .sheet-form hr {
   margin: 28px 0;
-  border-color: #3a2915;
+  border-color: #1a3d28;
   opacity: 1;
 }
 
 .sheet-form h3 {
-  color: var(--gold);
+  color: var(--mint);
 }
 
 .attrs-form {
@@ -471,7 +528,7 @@ textarea.grim-input {
   gap: 12px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #110b06;
+  background: #0a1710;
 }
 
 .attr-control strong {
@@ -498,9 +555,10 @@ textarea.grim-input {
   height: 28px;
   border: 1px solid var(--line);
   border-radius: 3px;
-  background: #35240f;
-  color: var(--gold);
+  background: #122a1c;
+  color: var(--purple-2);
   line-height: 1;
+  cursor: pointer;
 }
 
 .stepper span {
@@ -512,7 +570,7 @@ textarea.grim-input {
 
 .stepper em {
   min-width: 24px;
-  color: #233044;
+  color: var(--mint);
 }
 
 .form-actions {
@@ -530,6 +588,7 @@ textarea.grim-input {
   min-width: 330px;
 }
 
+/* ── Modal ── */
 .sheet-modal {
   position: fixed;
   inset: 0;
@@ -537,7 +596,7 @@ textarea.grim-input {
   padding: 24px;
   display: grid;
   place-items: center;
-  background: rgba(0, 0, 0, 0.68);
+  background: rgba(0, 0, 0, 0.72);
 }
 
 .sheet-detail {
@@ -545,20 +604,46 @@ textarea.grim-input {
   width: min(1120px, 100%);
   max-height: calc(100vh - 32px);
   overflow: auto;
-  border: 2px solid var(--gold);
+  border: 2px solid var(--purple);
   border-radius: 8px;
-  background: #171007;
-  box-shadow: var(--shadow);
+  background: #0d1f17;
+  box-shadow: 0 0 40px rgba(123, 44, 191, 0.25), var(--shadow);
+}
+
+.confirm-modal {
+  width: min(640px, 100%);
+}
+
+.confirm-box {
+  margin: 24px 30px;
+  padding: 24px;
+  border: 1px solid var(--danger);
+  border-radius: 6px;
+  background: rgba(224, 82, 112, 0.05);
+}
+
+.confirm-box p {
+  margin: 8px 0;
+}
+
+.confirm-box .confirm-title {
+  font-size: 1.25rem;
+}
+
+.confirm-box .support {
+  color: var(--danger);
+  font-weight: 800;
 }
 
 .sheet-detail > h2 {
   margin: 0;
   padding: 26px 30px;
-  border-bottom: 1px solid #3c2a14;
-  color: var(--gold);
+  border-bottom: 1px solid #1a3d28;
+  color: var(--purple-2);
   font-size: 1.72rem;
   font-weight: 800;
   text-transform: uppercase;
+  text-shadow: 0 0 14px rgba(123, 44, 191, 0.5);
 }
 
 .close-btn {
@@ -566,6 +651,14 @@ textarea.grim-input {
   top: 28px;
   right: 30px;
   border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: var(--text);
 }
 
 .detail-grid {
@@ -578,11 +671,13 @@ textarea.grim-input {
 .detail-grid aside {
   padding: 18px;
   border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #0a1a11;
 }
 
 .detail-grid h3,
 .detail-grid h4 {
-  color: var(--gold);
+  color: var(--mint);
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -610,12 +705,18 @@ textarea.grim-input {
   place-items: center;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #100a05;
+  background: #080f0b;
+  transition: border-color 0.15s;
+}
+
+.detail-attrs div:hover {
+  border-color: var(--purple);
 }
 
 .detail-attrs strong {
   font-size: 2rem;
   line-height: 1;
+  color: var(--mint);
 }
 
 .features {
@@ -623,6 +724,7 @@ textarea.grim-input {
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 6px;
+  background: #0a1710;
 }
 
 .features p {
@@ -630,7 +732,7 @@ textarea.grim-input {
 }
 
 .features strong {
-  color: var(--gold);
+  color: var(--purple-2);
   text-transform: uppercase;
 }
 
@@ -640,7 +742,7 @@ textarea.grim-input {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-top: 1px solid #3c2a14;
+  border-top: 1px solid #1a3d28;
   font-weight: 800;
 }
 
@@ -659,15 +761,15 @@ textarea.grim-input {
 }
 
 .notice.success {
-  border: 1px solid #406d35;
-  background: #132412;
-  color: #bff0a6;
+  border: 1px solid #1f6f4a;
+  background: #081f12;
+  color: var(--mint);
 }
 
 .notice.error {
-  border: 1px solid #85313b;
-  background: #2a1014;
-  color: #ffc2ca;
+  border: 1px solid #8c1a30;
+  background: #1a0810;
+  color: #f9a8bb;
 }
 
 .empty {

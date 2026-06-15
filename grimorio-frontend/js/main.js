@@ -34,13 +34,16 @@ const demos = [
   },
 ];
 
-function baseRascunho(classe = 'Guerreiro') {
+const CLASSE_PADRAO = 'Guerreiro';
+
+function baseRascunho(classe = CLASSE_PADRAO) {
   return {
     id: 0,
     nome: '',
     classe,
     raca: 'Humano',
     origem: 'Academico',
+    descricao: '',
     nivel: 1,
     campanhaId: state.campanhas[0]?.id || null,
     atributos: atributosPadrao(classe),
@@ -48,7 +51,7 @@ function baseRascunho(classe = 'Guerreiro') {
   };
 }
 
-function avisos() {
+function limparAvisos() {
   state.mensagem = '';
   state.erro = '';
 }
@@ -83,33 +86,46 @@ async function carregar(seed = true) {
 
 function lerFicha(form) {
   const dados = new FormData(form);
-  const atributos = {};
-
-  ATRIBUTOS.forEach(([chave]) => {
-    atributos[chave] = Number(dados.get(chave));
-  });
 
   return {
-    nome: String(dados.get('nome')).trim(),
-    classe: String(dados.get('classe')),
-    raca: String(dados.get('raca')),
-    origem: String(dados.get('origem')),
+    nome: lerTexto(dados, 'nome').trim(),
+    classe: lerTexto(dados, 'classe'),
+    raca: lerTexto(dados, 'raca'),
+    origem: lerTexto(dados, 'origem'),
+    descricao: lerTexto(dados, 'descricao').trim(),
     nivel: Number(dados.get('nivel')),
-    campanhaId: dados.get('campanhaId') ? Number(dados.get('campanhaId')) : null,
-    atributos,
+    campanhaId: lerCampanhaId(dados),
+    atributos: lerAtributos(dados),
   };
+}
+
+function lerTexto(dados, campo, valorPadrao = '') {
+  return String(dados.get(campo) || valorPadrao);
+}
+
+function lerCampanhaId(dados) {
+  return dados.get('campanhaId') ? Number(dados.get('campanhaId')) : null;
+}
+
+function lerAtributos(dados) {
+  return Object.fromEntries(
+    ATRIBUTOS.map(([chave]) => [chave, Number(dados.get(chave))]),
+  );
 }
 
 function preservarRascunho(form, atributos) {
   const dados = new FormData(form);
+  const classe = lerTexto(dados, 'classe', CLASSE_PADRAO);
+
   return {
-    ...(state.personagemEditando || baseRascunho(String(dados.get('classe') || 'Guerreiro'))),
-    nome: String(dados.get('nome') || ''),
-    classe: String(dados.get('classe') || 'Guerreiro'),
-    raca: String(dados.get('raca') || 'Humano'),
-    origem: String(dados.get('origem') || 'Academico'),
+    ...(state.personagemEditando || baseRascunho(classe)),
+    nome: lerTexto(dados, 'nome'),
+    classe,
+    raca: lerTexto(dados, 'raca', 'Humano'),
+    origem: lerTexto(dados, 'origem', 'Academico'),
+    descricao: lerTexto(dados, 'descricao'),
     nivel: Number(dados.get('nivel') || 1),
-    campanhaId: dados.get('campanhaId') ? Number(dados.get('campanhaId')) : null,
+    campanhaId: lerCampanhaId(dados),
     atributos,
   };
 }
@@ -117,13 +133,13 @@ function preservarRascunho(form, atributos) {
 function desenhar() {
   render({
     novo() {
-      avisos();
+      limparAvisos();
       state.personagemEditando = baseRascunho();
       state.tela = 'formulario';
       desenhar();
     },
     cancelar() {
-      avisos();
+      limparAvisos();
       state.tela = 'lista';
       state.personagemEditando = null;
       desenhar();
@@ -131,7 +147,7 @@ function desenhar() {
     async salvar(event) {
       event.preventDefault();
       try {
-        avisos();
+        limparAvisos();
         const dados = lerFicha(event.currentTarget);
         if (state.personagemEditando?.id) {
           await personagemService.atualizar(state.personagemEditando.id, dados);
@@ -176,7 +192,7 @@ function desenhar() {
       desenhar();
     },
     async detalhes(personagem) {
-      avisos();
+      limparAvisos();
       state.personagemSelecionado = await personagemService.buscar(personagem.id);
       desenhar();
     },
@@ -185,19 +201,29 @@ function desenhar() {
       desenhar();
     },
     editarDetalhe() {
-      avisos();
+      limparAvisos();
       state.personagemEditando = state.personagemSelecionado;
       state.personagemSelecionado = null;
       state.tela = 'formulario';
       desenhar();
     },
     async remover(personagem) {
-      const ok = window.confirm(`Tem certeza de que deseja banir "${personagem.nome}" do Grimório?\n\nEste aventureiro será removido permanentemente das crônicas.`);
-      if (!ok) return;
+      limparAvisos();
+      state.personagemParaRemover = personagem;
+      desenhar();
+    },
+    cancelarRemocao() {
+      state.personagemParaRemover = null;
+      desenhar();
+    },
+    async confirmarRemocao() {
+      const personagem = state.personagemParaRemover;
+      if (!personagem) return;
       try {
-        avisos();
+        limparAvisos();
         await personagemService.remover(personagem.id);
         state.mensagem = 'Ficha removida do grimório.';
+        state.personagemParaRemover = null;
         await carregar(false);
       } catch (error) {
         state.erro = error.message || 'Não foi possível remover a ficha.';
